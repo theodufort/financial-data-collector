@@ -1,0 +1,17 @@
+{
+  "name": "financial-data-collector",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "https-proxy-agent": "^7.0.4",
+    "node-fetch": "^3.3.2",
+    "p-limit": "^5.0.0",
+    "postgres": "^3.4.4"
+  }
+}
