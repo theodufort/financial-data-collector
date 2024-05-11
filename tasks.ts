@@ -1,45 +1,59 @@
 import { uploadStockData } from "./db";
-import { getNasdaqPrices } from "./endpoints";
-import * as fs from "fs";
-import * as util from "util";
-import pLimit from "p-limit";
-const readFile = util.promisify(fs.readFile);
+import { restClient } from "@polygon.io/client-js";
 
-async function readAndProcessFile() {
-  try {
-    const data = await readFile("nasdaq_stocks.csv");
-    const stocks = data.toString();
-    const stocks_stream = stocks
-      .split("\n")
-      .map((x) => x.replace(/(\r\n|\n|\r)/gm, ""));
-    return stocks_stream;
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
-}
+import pLimit from "p-limit";
+const globalFetchOptions = {
+  pagination: true,
+};
+const rest = restClient(
+  "v8Nwv2ofUDmb3vjsFWorHx3Q8heLNMp6",
+  "https://api.polygon.io",
+  globalFetchOptions
+);
 
 export async function getHistoricalPrices(
   fromdate: string,
   todate: string,
-  limit: string
+  limit: number
 ) {
-  var stocks_stream = await readAndProcessFile();
-  console.log(stocks_stream);
-  const concurrencyLimit = 100; // Set your desired concurrency limit here
-  const limitTasks = pLimit(concurrencyLimit);
+  const concurrencyLimit = 150; // Adjust this number based on your system capability
+  const limitPromise = pLimit(concurrencyLimit);
 
-  const tasks = stocks_stream.map(async (ticker) => {
-    await limitTasks(async () => {
-      const data = await getNasdaqPrices(ticker, fromdate, todate, limit);
-      console.log(data?.status.rCode);
-      if (data != null) {
-        await uploadStockData(data);
-      }
+  try {
+    const { results } = await rest.reference.tickers({
+      market: "stocks",
+      limit: 1000,
     });
-  });
+    const stockPromises = results.map((stock) =>
+      limitPromise(() =>
+        fetchAndUploadStockData(stock.ticker, fromdate, todate, limit)
+      )
+    );
 
-  await Promise.all(tasks);
+    await Promise.all(stockPromises);
+  } catch (error) {
+    console.error("An error happened:", error);
+  }
+}
 
-  console.log("All tasks completed.");
+async function fetchAndUploadStockData(ticker, fromdate, todate, limit) {
+  try {
+    var response = await rest.stocks.aggregates(
+      ticker,
+      1,
+      "minute",
+      fromdate,
+      todate,
+      { limit }
+    );
+    const start = Date.now();
+
+    await uploadStockData(response);
+    const end = Date.now();
+    const executionTime = end - start;
+    console.log(executionTime);
+    response = null;
+  } catch (error) {
+    console.error(`An error occurred fetching data for ${ticker}:`, error);
+  }
 }

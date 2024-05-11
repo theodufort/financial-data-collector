@@ -1,29 +1,29 @@
 import { EntityTarget, ObjectLiteral } from "typeorm";
-import { DbRow, NasdaqApiResponse } from "./interfaces";
+import { DbRow, PolygonResponse } from "./interfaces";
 import { getDataSource } from "./src/index";
 import { StocksHistoricalPricesDaily } from "./src/entity/StocksHistoricalPricesDaily";
 
 const AppDataSource = await getDataSource();
-export async function uploadStockData(data: NasdaqApiResponse) {
+export async function uploadStockData(data: PolygonResponse) {
   if (AppDataSource) {
     try {
-      for await (const row of data.data.tradesTable.rows) {
+      for await (const row of data.results) {
         await AppDataSource.createQueryBuilder()
           .insert()
           .into(StocksHistoricalPricesDaily)
           .values({
-            ticker: data.data.symbol,
-            date: row.date,
-            close: parseFloat(row.close.replace("$", "")),
-            volume: parseInt(row.volume.replace(/,/g, "")),
-            open: parseFloat(row.open.replace("$", "")),
-            high: parseFloat(row.high.replace("$", "")),
-            low: parseFloat(row.low.replace("$", "")),
+            ticker: data.ticker,
+            date: row.t,
+            close: row.c,
+            volume: row.v,
+            open: row.o,
+            high: row.h,
+            low: row.l,
           })
-          .orUpdate(["close", "volume", "open", "high", "low"])
+          .orIgnore()
           .execute();
-        console.log("Stock data uploaded successfully.");
       }
+      console.log(`Data uploaded for ticker: ${data.ticker}`);
     } catch (error) {
       console.error("Error uploading stock data:", error);
     }

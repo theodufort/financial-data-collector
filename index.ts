@@ -1,10 +1,10 @@
 import { getStockData } from "./db";
 import { model1 } from "./predict";
+import { getDataSource } from "./src";
 import { StocksHistoricalPricesDaily } from "./src/entity/StocksHistoricalPricesDaily";
 import { getHistoricalPrices } from "./tasks";
 import "reflect-metadata";
-
-await getHistoricalPrices("2000-02-01", "2025-02-02", "100000000");
+await getHistoricalPrices("2000-02-01", "2025-02-02", 50000);
 // const data1 = await getStockData(
 //   StocksHistoricalPricesDaily,
 //   "2000-02-01",

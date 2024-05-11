@@ -7,13 +7,13 @@ export class StocksHistoricalPricesDaily {
   @Column("character varying", { primary: true, name: "ticker", length: 10 })
   ticker: string;
 
-  @Column("date", { primary: true, name: "date" })
-  date: string;
+  @Column("bigint", { primary: true, name: "date" })
+  date: number;
 
   @Column("numeric", { name: "close", precision: 10, scale: 2 })
   close: number;
 
-  @Column("bigint", { name: "volume" })
+  @Column("numeric", { name: "volume" })
   volume: number;
 
   @Column("numeric", { name: "open", precision: 10, scale: 2 })

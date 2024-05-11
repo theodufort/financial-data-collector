@@ -1,28 +1,6 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { StocksHistoricalPricesDaily } from "./entity/StocksHistoricalPricesDaily";
-import { StocksHistoricalPrices_5minute } from "./entity/StocksHistoricalPrices_5minute";
-import { StocksHistoricalPrices_15minute } from "./entity/StocksHistoricalPrices_15minute";
-import { StocksHistoricalPrices_60minute } from "./entity/StocksHistoricalPrices_60minute";
-
-const AppDataSource = new DataSource({
-  type: "postgres",
-  host: "aws-0-ca-central-1.pooler.supabase.com",
-  port: 5432,
-  username: "postgres.vmgbwrrceuwynpeoacfh",
-  password: "Ku23jr711111!",
-  database: "postgres",
-  synchronize: false,
-  logging: false,
-  entities: [
-    StocksHistoricalPricesDaily,
-    StocksHistoricalPrices_5minute,
-    StocksHistoricalPrices_15minute,
-    StocksHistoricalPrices_60minute,
-  ],
-  migrations: [],
-  subscribers: [],
-});
+import { AppDataSource } from "./data-source";
 
 AppDataSource.initialize()
   .then(async () => {

@@ -17,6 +17,6 @@ export async function model1(trainingData: DbRow[], futureData: DbRow[]) {
   const futureTensor = tf.tensor1d(
     futureData.map((item) => item.close.toString())
   );
-  const predictions = model.predict(futureTensor).dataSync();
-  return predictions;
+  // const predictions = model.predict(futureTensor).dataSync();
+  // return predictions;
 }
